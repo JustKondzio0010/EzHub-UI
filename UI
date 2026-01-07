@@ -138,68 +138,70 @@ function Library:Notify(Config)
     local NotifyFrame = Instance.new("Frame")
     NotifyFrame.Name = "Notification"
     NotifyFrame.Parent = NotificationContainer
-    NotifyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    NotifyFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    NotifyFrame.BackgroundTransparency = 0.1
     NotifyFrame.BorderSizePixel = 0
     NotifyFrame.Size = UDim2.new(1, 0, 0, 0)
     NotifyFrame.ClipsDescendants = true
-
+    
     local Stroke = Instance.new("UIStroke")
     Stroke.Parent = NotifyFrame
     Stroke.Color = Color3.fromRGB(0, 255, 255)
     Stroke.Thickness = 1
-    Stroke.Transparency = 0.5
-
+    Stroke.Transparency = 0.6
+    
     local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 8)
+    Corner.CornerRadius = UDim.new(0, 16)
     Corner.Parent = NotifyFrame
-
+    
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Parent = NotifyFrame
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Position = UDim2.new(0, 10, 0, 10)
+    TitleLabel.Position = UDim2.new(0, 15, 0, 10)
     TitleLabel.Size = UDim2.new(1, -20, 0, 20)
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.Text = Title
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 14
+    TitleLabel.TextSize = 15
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-
+    
     local ContentLabel = Instance.new("TextLabel")
     ContentLabel.Parent = NotifyFrame
     ContentLabel.BackgroundTransparency = 1
-    ContentLabel.Position = UDim2.new(0, 10, 0, 30)
+    ContentLabel.Position = UDim2.new(0, 15, 0, 30)
     ContentLabel.Size = UDim2.new(1, -20, 0, 40)
     ContentLabel.Font = Enum.Font.Gotham
     ContentLabel.Text = Content
-    ContentLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    ContentLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
     ContentLabel.TextSize = 13
     ContentLabel.TextWrapped = true
     ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
-
+    
     local ProgressBar = Instance.new("Frame")
     ProgressBar.Parent = NotifyFrame
     ProgressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
     ProgressBar.BorderSizePixel = 0
-    ProgressBar.Position = UDim2.new(0, 0, 1, -2)
-    ProgressBar.Size = UDim2.new(1, 0, 0, 2)
-
+    ProgressBar.Position = UDim2.new(0, 0, 1, -3)
+    ProgressBar.Size = UDim2.new(1, 0, 0, 3)
+    
     if Icon then
         local IconImage = Instance.new("ImageLabel")
         IconImage.Parent = NotifyFrame
         IconImage.BackgroundTransparency = 1
-        IconImage.Position = UDim2.new(1, -30, 0, 10)
-        IconImage.Size = UDim2.new(0, 20, 0, 20)
+        IconImage.Position = UDim2.new(1, -35, 0, 15)
+        IconImage.Size = UDim2.new(0, 24, 0, 24)
         IconImage.Image = GetIcon(Icon)
-        IconImage.ImageColor3 = Color3.fromRGB(200, 200, 200)
-        TitleLabel.Size = UDim2.new(1, -50, 0, 20)
+        IconImage.ImageColor3 = Color3.fromRGB(220, 220, 220)
+        
+        TitleLabel.Size = UDim2.new(1, -60, 0, 20)
     end
-
-    TweenService:Create(NotifyFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, 80)}):Play()
-    TweenService:Create(ProgressBar, TweenInfo.new(Duration, Enum.EasingStyle.Linear), {Size = UDim2.new(0, 0, 0, 2)}):Play()
-
+    
+    TweenService:Create(NotifyFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, 85)}):Play()
+    TweenService:Create(ProgressBar, TweenInfo.new(Duration, Enum.EasingStyle.Linear), {Size = UDim2.new(0, 0, 0, 3)}):Play()
+    
     task.delay(Duration, function()
-        TweenService:Create(NotifyFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-        wait(0.3)
+        TweenService:Create(NotifyFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+        wait(0.5)
         NotifyFrame:Destroy()
     end)
 end
