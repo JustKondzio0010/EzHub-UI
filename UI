@@ -313,13 +313,29 @@ function Library:CreateWindow(Config)
         local MainContainer = CreateStyledWindow("MainContainer", Size, UDim2.new(0.5, -Size.X.Offset/2, 0.5, -Size.Y.Offset/2))
         MakeDraggable(MainContainer, MainContainer)
 
-        -- Floating Icon & Title
-        local FloatingIcon = Instance.new("ImageLabel")
+        -- Floating Icon & Title (Now acts as Toggle)
+        local FloatingIcon = Instance.new("ImageButton") -- Changed to ImageButton
         FloatingIcon.Name = "FloatingIcon"
         FloatingIcon.Parent = ScreenGui 
         FloatingIcon.BackgroundTransparency = 1
         FloatingIcon.Image = "rbxassetid://102171960897605"
         FloatingIcon.Size = UDim2.new(0, 80 * ScaleFactor, 0, 80 * ScaleFactor)
+        
+        -- Toggle Logic
+        local isVisible = true
+        FloatingIcon.MouseButton1Click:Connect(function()
+            isVisible = not isVisible
+            if isVisible then
+                MainContainer.Visible = true
+                if LeftWindow then LeftWindow.Visible = true end
+                if RightWindow then RightWindow.Visible = true end
+                TweenService:Create(MainContainer, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+            else
+                MainContainer.Visible = false
+                if LeftWindow then LeftWindow.Visible = false end
+                if RightWindow then RightWindow.Visible = false end
+            end
+        end)
         
         local GradientTitle = Instance.new("TextLabel")
         GradientTitle.Name = "GradientTitle"
@@ -935,7 +951,18 @@ function Library:CreateWindow(Config)
                  
                  PlayBtn.MouseButton1Click:Connect(function()
                      if gameData.id and gameData.id ~= 0 then
-                         TeleportService:Teleport(gameData.id, LocalPlayer)
+                         -- Improved Teleport Logic for Exploits
+                         local success, err = pcall(function()
+                             if syn and syn.queue_on_teleport then
+                                 syn.queue_on_teleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/JustKondzio0010/EzHub-UI/refs/heads/main/UI'))()")
+                             elseif queue_on_teleport then
+                                 queue_on_teleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/JustKondzio0010/EzHub-UI/refs/heads/main/UI'))()")
+                             end
+                             TeleportService:Teleport(gameData.id, LocalPlayer)
+                         end)
+                         if not success then
+                             Library:Notify({Title = "Teleport Failed", Content = tostring(err), Duration = 3})
+                         end
                      else
                         Library:Notify({Title = "Error", Content = "No ID provided for " .. gameData.name, Duration = 3})
                      end
