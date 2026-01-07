@@ -457,35 +457,6 @@ function Library:CreateWindow(Config)
         MinBtn.ImageColor3 = Library.Theme.TextDark
         MinBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
-        -- Left Window
-        local LeftSize = UDim2.fromOffset(250 * ScaleFactor, 400 * ScaleFactor)
-        LeftWindow = CreateStyledWindow("SupportedGames", LeftSize, UDim2.new(0.5, -Size.X.Offset/2 - (270 * ScaleFactor), 0.5, -Size.Y.Offset/2))
-        MakeDraggable(LeftWindow, LeftWindow)
-
-        local LeftTitle = Instance.new("TextLabel")
-        LeftTitle.Parent = LeftWindow
-        LeftTitle.BackgroundTransparency = 1
-        LeftTitle.Size = UDim2.new(1, 0, 0, 40)
-        LeftTitle.Font = Enum.Font.GothamBold
-        LeftTitle.Text = "SUPPORTED GAMES"
-        LeftTitle.TextColor3 = Library.Theme.TextDark
-        LeftTitle.TextSize = 14 * ScaleFactor
-
-        local GamesScroll = Instance.new("ScrollingFrame")
-        GamesScroll.Parent = LeftWindow
-        GamesScroll.BackgroundTransparency = 1
-        GamesScroll.Position = UDim2.new(0, 10, 0, 40)
-        GamesScroll.Size = UDim2.new(1, -20, 1, -50)
-        GamesScroll.ScrollBarThickness = 2
-        GamesScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-        local GamesLayout = Instance.new("UIListLayout")
-        GamesLayout.Parent = GamesScroll
-        GamesLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        GamesLayout.Padding = UDim.new(0, 8)
-        GamesLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            GamesScroll.CanvasSize = UDim2.new(0, 0, 0, GamesLayout.AbsoluteContentSize.Y + 10)
-        end)
-
         -- Right Window
         local RightSize = UDim2.fromOffset(250 * ScaleFactor, 400 * ScaleFactor)
         RightWindow = CreateStyledWindow("PlayerInfo", RightSize, UDim2.new(0.5, Size.X.Offset/2 + (20 * ScaleFactor), 0.5, -Size.Y.Offset/2))
@@ -632,8 +603,62 @@ function Library:CreateWindow(Config)
 
         Window.PagesContainer = PagesContainer
         Window.TabBar = TabBar
-        Window.GamesScroll = GamesScroll
         Window.ScaleFactor = ScaleFactor
+
+        local GamesPanel = Instance.new("Frame")
+        GamesPanel.Name = "GamesPanel"
+        GamesPanel.Parent = MainContainer
+        GamesPanel.BackgroundColor3 = Library.Theme.Secondary
+        GamesPanel.Position = UDim2.new(0, 140 * ScaleFactor, 0, 60)
+        GamesPanel.Size = UDim2.new(1, -150 * ScaleFactor, 1, -70)
+        GamesPanel.Visible = false
+        local GPStroke = Instance.new("UIStroke")
+        GPStroke.Parent = GamesPanel
+        GPStroke.Color = Library.Theme.Stroke
+        GPStroke.Thickness = 1
+        local GPCorner = Instance.new("UICorner")
+        GPCorner.CornerRadius = UDim.new(0, 8)
+        GPCorner.Parent = GamesPanel
+
+        local GamesTitle = Instance.new("TextLabel")
+        GamesTitle.Parent = GamesPanel
+        GamesTitle.BackgroundTransparency = 1
+        GamesTitle.Position = UDim2.new(0, 10, 0, 10)
+        GamesTitle.Size = UDim2.new(1, -20, 0, 24)
+        GamesTitle.Font = Enum.Font.GothamBold
+        GamesTitle.Text = "SUPPORTED GAMES"
+        GamesTitle.TextColor3 = Library.Theme.TextDark
+        GamesTitle.TextSize = 14 * ScaleFactor
+
+        local GamesScroll = Instance.new("ScrollingFrame")
+        GamesScroll.Parent = GamesPanel
+        GamesScroll.BackgroundTransparency = 1
+        GamesScroll.Position = UDim2.new(0, 10, 0, 40)
+        GamesScroll.Size = UDim2.new(1, -20, 1, -50)
+        GamesScroll.ScrollBarThickness = 2
+        GamesScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        local GamesLayout = Instance.new("UIListLayout")
+        GamesLayout.Parent = GamesScroll
+        GamesLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        GamesLayout.Padding = UDim.new(0, 8)
+        GamesLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            GamesScroll.CanvasSize = UDim2.new(0, 0, 0, GamesLayout.AbsoluteContentSize.Y + 10)
+        end)
+
+        Window.GamesScroll = GamesScroll
+
+        local GamesBtn = Instance.new("TextButton")
+        GamesBtn.Parent = ControlFrame
+        GamesBtn.BackgroundTransparency = 1
+        GamesBtn.Position = UDim2.new(0, 10, 0, 0)
+        GamesBtn.Size = UDim2.new(0, 80, 0, 30)
+        GamesBtn.Font = Enum.Font.GothamBold
+        GamesBtn.Text = "Games"
+        GamesBtn.TextColor3 = Library.Theme.TextDark
+        GamesBtn.TextSize = 12 * ScaleFactor
+        GamesBtn.MouseButton1Click:Connect(function()
+            GamesPanel.Visible = not GamesPanel.Visible
+        end)
     end
 
     local function CreateDeviceButton(name, icon, scale)
@@ -904,6 +929,21 @@ function Library:CreateWindow(Config)
                     TweenService:Create(Fill, TweenInfo.new(0.1), {Size = UDim2.new((val - Min) / (Max - Min), 0, 1, 0)}):Play()
                     if Config.Callback then Config.Callback(val) end
                 end
+                
+                local ResetBtn = Instance.new("TextButton")
+                ResetBtn.Parent = SliderFrame
+                ResetBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+                ResetBtn.Position = UDim2.new(1, -120, 0, 5)
+                ResetBtn.Size = UDim2.new(0, 50, 0, 20)
+                ResetBtn.Font = Enum.Font.Gotham
+                ResetBtn.Text = "Reset"
+                ResetBtn.TextColor3 = Library.Theme.TextDark
+                ResetBtn.TextSize = 12 * Window.ScaleFactor
+                Instance.new("UICorner", ResetBtn).CornerRadius = UDim.new(0, 4)
+                ResetBtn.MouseButton1Click:Connect(function()
+                    local d = Config.Default or Min
+                    Update(d)
+                end)
                 
                 local dragging = false
                 Trigger.InputBegan:Connect(function(input)
