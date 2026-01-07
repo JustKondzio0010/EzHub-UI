@@ -246,7 +246,7 @@ function Library:CreateWindow(Config)
     
     -- ScreenGui Setup
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "WindUI_" .. Folder
+    ScreenGui.Name = "EzHub_" .. Folder
     ScreenGui.ResetOnSpawn = false
     pcall(function() ScreenGui.Parent = game.CoreGui end)
     if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
