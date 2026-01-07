@@ -274,6 +274,46 @@ function Library:CreateWindow(Config)
         ButtonContainer.Visible = false
         task.delay(0.5, function() DeviceModal:Destroy() end)
 
+        -- 5 Second Loading Screen
+        local LoadingFrame = Instance.new("Frame")
+        LoadingFrame.Name = "LoadingFrame"
+        LoadingFrame.Parent = ScreenGui
+        LoadingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        LoadingFrame.BackgroundTransparency = 0.2
+        LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+        LoadingFrame.ZIndex = 200
+        
+        local LoadingBar = Instance.new("Frame")
+        LoadingBar.Parent = LoadingFrame
+        LoadingBar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+        LoadingBar.Size = UDim2.new(0, 300, 0, 6)
+        LoadingBar.Position = UDim2.new(0.5, -150, 0.5, 0)
+        Instance.new("UICorner", LoadingBar).CornerRadius = UDim.new(1, 0)
+        
+        local LoadingFill = Instance.new("Frame")
+        LoadingFill.Parent = LoadingBar
+        LoadingFill.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+        LoadingFill.Size = UDim2.new(0, 0, 1, 0)
+        Instance.new("UICorner", LoadingFill).CornerRadius = UDim.new(1, 0)
+        
+        local LoadingText = Instance.new("TextLabel")
+        LoadingText.Parent = LoadingFrame
+        LoadingText.BackgroundTransparency = 1
+        LoadingText.Position = UDim2.new(0.5, -100, 0.5, -30)
+        LoadingText.Size = UDim2.new(0, 200, 0, 20)
+        LoadingText.Font = Enum.Font.GothamBold
+        LoadingText.Text = "LOADING EZHUB..."
+        LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        LoadingText.TextSize = 18
+        
+        TweenService:Create(LoadingFill, TweenInfo.new(5, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)}):Play()
+        task.wait(5)
+        TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(LoadingBar, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(LoadingFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        task.delay(0.5, function() LoadingFrame:Destroy() end)
+        
         -- --- MAIN UI CONSTRUCTION ---
         
         local function CreateStyledWindow(name, size, position)
@@ -648,8 +688,14 @@ function Library:CreateWindow(Config)
     local function CreateDeviceButton(name, icon, scale)
         local Btn = Instance.new("Frame")
         Btn.Size = UDim2.new(0, 150, 0, 150)
-        Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+        Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35) -- Brighter
         Btn.Parent = ButtonContainer
+        
+        local Stroke = Instance.new("UIStroke") -- Add Stroke for visibility
+        Stroke.Parent = Btn
+        Stroke.Color = Color3.fromRGB(0, 255, 255)
+        Stroke.Thickness = 1
+        Stroke.Transparency = 0.5
         
         local Corner = Instance.new("UICorner")
         Corner.CornerRadius = UDim.new(0, 12)
@@ -666,9 +712,9 @@ function Library:CreateWindow(Config)
         local Label = Instance.new("TextLabel")
         Label.BackgroundTransparency = 1
         Label.Text = name
-        Label.Font = Enum.Font.GothamBold
+        Label.Font = Enum.Font.GothamBlack -- Black for thickness
         Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Label.TextSize = 18
+        Label.TextSize = 20 -- Larger
         Label.Size = UDim2.new(1, 0, 0, 30)
         Label.Position = UDim2.new(0, 0, 0.7, 0)
         Label.Parent = Btn
@@ -685,10 +731,12 @@ function Library:CreateWindow(Config)
         
         -- Hover
         Trigger.MouseEnter:Connect(function()
-            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50)}):Play()
+            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
+            TweenService:Create(Stroke, TweenInfo.new(0.2), {Transparency = 0, Color = Color3.fromRGB(255, 0, 255)}):Play()
         end)
         Trigger.MouseLeave:Connect(function()
-            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(20, 20, 25)}):Play()
+            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 35)}):Play()
+            TweenService:Create(Stroke, TweenInfo.new(0.2), {Transparency = 0.5, Color = Color3.fromRGB(0, 255, 255)}):Play()
         end)
     end
 
@@ -697,6 +745,19 @@ function Library:CreateWindow(Config)
     CreateDeviceButton("MOBILE", "mobile", 0.6)
 
     -- API Methods attached to Window
+    function Window:ToggleBackground(state)
+        -- Toggles visibility of decorative elements
+        if state == true then -- Hide
+             BackgroundOverlay.Visible = false
+             if ScreenGui:FindFirstChild("FloatingIcon") then ScreenGui.FloatingIcon.Visible = false end
+             if ScreenGui:FindFirstChild("GradientTitle") then ScreenGui.GradientTitle.Visible = false end
+        else -- Show
+             BackgroundOverlay.Visible = true
+             if ScreenGui:FindFirstChild("FloatingIcon") then ScreenGui.FloatingIcon.Visible = true end
+             if ScreenGui:FindFirstChild("GradientTitle") then ScreenGui.GradientTitle.Visible = true end
+        end
+    end
+
     function Window:Tab(Config)
         -- Wait until UI is built? 
         -- Problem: User script calls this immediately. 
