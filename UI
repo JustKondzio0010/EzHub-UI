@@ -8,6 +8,18 @@ local LocalPlayer = Players.LocalPlayer
 local Library = {}
 Library.__index = Library
 
+Library.Icons = {
+    home = "rbxassetid://10723415903",
+    settings = "rbxassetid://10734950309",
+    user = "rbxassetid://10747373176",
+    search = "rbxassetid://10747373176", -- Using generic for now as search specific might differ
+    info = "rbxassetid://10747373176",
+    sword = "rbxassetid://10747384394",
+    shield = "rbxassetid://10747384394", -- placeholder
+    close = "rbxassetid://10747384394",
+    menu = "rbxassetid://10747384542"
+}
+
 local Colors = {
     Background = Color3.fromRGB(15, 15, 20),
     DarkContrast = Color3.fromRGB(10, 10, 15),
@@ -200,12 +212,18 @@ function Library:Init(options)
     Title.Font = Enum.Font.GothamBlack
     Title.TextSize = 18
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.AutomaticSize = Enum.AutomaticSize.X -- Auto adjust width
-    Title.Size = UDim2.new(0, 0, 1, 0) -- Let automatic size handle X
-    Title.Position = UDim2.new(0, 45, 0, 0) -- Shifted right
+    Title.AutomaticSize = Enum.AutomaticSize.X 
+    Title.Size = UDim2.new(0, 0, 1, 0) 
+    Title.Position = UDim2.new(0, 45, 0, 0)
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
-    Title.Parent = Header
+    Title.TextTruncate = Enum.TextTruncate.AtEnd -- Add Truncation
+    Title.Parent = Header -- We will re-parent later, but properties matter
+    
+    -- Constraint for Title Max Width
+    local TitleSizeConstraint = Instance.new("UISizeConstraint")
+    TitleSizeConstraint.MaxSize = Vector2.new(300, 40) -- Limit width to prevent pushing version off
+    TitleSizeConstraint.Parent = Title
 
     local TitleGradient = Instance.new("UIGradient")
     TitleGradient.Color = ColorSequence.new({
@@ -761,12 +779,16 @@ function Library:Init(options)
              TabIcon.Size = UDim2.new(0, 24, 0, 24)
              TabIcon.Position = UDim2.new(0, 10, 0.5, -12)
              TabIcon.BackgroundTransparency = 1
-             TabIcon.Image = icon
-             if string.find(icon, "http") then
-                 -- It's a URL, keep it
+             
+             -- Resolve Icon
+             local iconId = icon
+             if Library.Icons[string.lower(icon)] then
+                 iconId = Library.Icons[string.lower(icon)]
              elseif tonumber(icon) then
-                 TabIcon.Image = "rbxassetid://" .. icon
+                 iconId = "rbxassetid://" .. icon
              end
+             
+             TabIcon.Image = iconId
              TabIcon.Parent = TabButton
         end
         
