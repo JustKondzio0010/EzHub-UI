@@ -217,6 +217,24 @@ function Library:Init(options)
     CloseBtn.MouseEnter:Connect(function() TweenService:Create(CloseBtn, TweenInfo.new(0.2), {TextColor3 = Colors.Error}):Play() end)
     CloseBtn.MouseLeave:Connect(function() TweenService:Create(CloseBtn, TweenInfo.new(0.2), {TextColor3 = Colors.Secondary}):Play() end)
     CloseBtn.MouseButton1Click:Connect(function()
+        -- Close Animation
+        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, width, 0, 0), BackgroundTransparency = 1}):Play()
+        TweenService:Create(PlayerInfoFrame, tweenInfo, {Size = UDim2.new(0, playerInfoWidth, 0, 0), BackgroundTransparency = 1}):Play()
+        TweenService:Create(FloatingIcon, tweenInfo, {ImageTransparency = 1}):Play()
+        
+        for _, desc in pairs(MainFrame:GetDescendants()) do
+            if desc:IsA("GuiObject") then
+                TweenService:Create(desc, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1, ImageTransparency = 1}):Play()
+            end
+        end
+        for _, desc in pairs(PlayerInfoFrame:GetDescendants()) do
+            if desc:IsA("GuiObject") then
+                TweenService:Create(desc, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1, ImageTransparency = 1}):Play()
+            end
+        end
+        
+        task.wait(0.5)
         ScreenGui:Destroy()
     end)
 
@@ -310,6 +328,37 @@ function Library:Init(options)
     DetailsFrame.Parent = PlayerInfoFrame
     Instance.new("UICorner", DetailsFrame).CornerRadius = UDim.new(0, 6)
 
+    -- Toggle Player Info Button
+    local PIToggleBtn = Instance.new("TextButton")
+    PIToggleBtn.Text = "-"
+    PIToggleBtn.Font = Enum.Font.GothamBold
+    PIToggleBtn.TextSize = 18
+    PIToggleBtn.TextColor3 = Colors.Secondary
+    PIToggleBtn.Size = UDim2.new(0, 30, 1, 0)
+    PIToggleBtn.Position = UDim2.new(1, -35, 0, 0)
+    PIToggleBtn.BackgroundTransparency = 1
+    PIToggleBtn.Parent = PIHeader
+
+    local piExpanded = true
+    PIToggleBtn.MouseButton1Click:Connect(function()
+        piExpanded = not piExpanded
+        if piExpanded then
+            TweenService:Create(PlayerInfoFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0, playerInfoWidth, 0, 350)}):Play()
+            PAvatar.Visible = true
+            PName.Visible = true
+            PUser.Visible = true
+            DetailsFrame.Visible = true
+            PIToggleBtn.Text = "-"
+        else
+            TweenService:Create(PlayerInfoFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0, playerInfoWidth, 0, 40)}):Play()
+            PAvatar.Visible = false
+            PName.Visible = false
+            PUser.Visible = false
+            DetailsFrame.Visible = false
+            PIToggleBtn.Text = "+"
+        end
+    end)
+
     local function CreateDetailRow(label, value, order)
         local Row = Instance.new("Frame")
         Row.Size = UDim2.new(1, 0, 0, 25)
@@ -361,7 +410,7 @@ function Library:Init(options)
     TabContainer.Position = UDim2.new(0, 0, 0, 40)
     TabContainer.BackgroundColor3 = Colors.Sidebar
     TabContainer.BorderSizePixel = 0
-    TabContainer.ScrollBarThickness = 2
+    TabContainer.ScrollBarThickness = 0
     TabContainer.Parent = MainFrame
 
     local TabList = Instance.new("UIListLayout")
@@ -437,7 +486,7 @@ function Library:Init(options)
         end
     end
 
-    function Window:Load()
+    function Window:Load(gameName)
         local LoadingFrame = Instance.new("Frame")
         LoadingFrame.Name = "LoadingScreen"
         LoadingFrame.Size = UDim2.new(1, 0, 1, 100) 
@@ -483,6 +532,19 @@ function Library:Init(options)
         local LogoAspect = Instance.new("UIAspectRatioConstraint")
         LogoAspect.AspectRatio = 0.75 
         LogoAspect.Parent = LoadingLogo
+
+        -- Game Name Label
+        local GameNameLabel = Instance.new("TextLabel")
+        GameNameLabel.Text = gameName or "Game Name"
+        GameNameLabel.Font = Enum.Font.GothamBold
+        GameNameLabel.TextSize = 24
+        GameNameLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        GameNameLabel.Size = UDim2.new(1, 0, 0, 30)
+        GameNameLabel.Position = UDim2.new(0.5, 0, 0.5, 80) -- Below Logo
+        GameNameLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        GameNameLabel.BackgroundTransparency = 1
+        GameNameLabel.TextTransparency = 1
+        GameNameLabel.Parent = LoadingFrame
         
         -- Loading Bar
         local LoadingBarBg = Instance.new("Frame")
@@ -514,7 +576,11 @@ function Library:Init(options)
             local logoTarget = UDim2.new(0.5, 0, 0.4, 0)
             TweenService:Create(LoadingLogo, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = logoTarget}):Play()
             
-            task.wait(1)
+            task.wait(0.8)
+            -- Fade in Game Name
+            TweenService:Create(GameNameLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+            
+            task.wait(0.2)
 
             -- Levitate Logo
             task.spawn(function()
@@ -533,6 +599,7 @@ function Library:Init(options)
             
             TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
             TweenService:Create(LoadingLogo, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+            TweenService:Create(GameNameLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
             TweenService:Create(LoadingBarBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
             TweenService:Create(LoadingBarFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
             
@@ -544,15 +611,44 @@ function Library:Init(options)
     end
 
     -- Tab Functionality
-    function Window:CreateTab(name)
+    function Window:CreateTab(name, icon)
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, 0, 0, 40)
         TabButton.BackgroundTransparency = 1
-        TabButton.Text = name
-        TabButton.TextColor3 = Colors.Secondary
-        TabButton.Font = Enum.Font.GothamBold
-        TabButton.TextSize = 14
+        TabButton.Text = "" -- We will use manual labels
         TabButton.Parent = TabContainer
+        
+        local TabIcon = nil
+        if icon then
+             TabIcon = Instance.new("ImageLabel")
+             TabIcon.Size = UDim2.new(0, 24, 0, 24)
+             TabIcon.Position = UDim2.new(0, 10, 0.5, -12)
+             TabIcon.BackgroundTransparency = 1
+             TabIcon.Image = icon
+             if string.find(icon, "http") then
+                 -- It's a URL, keep it
+             elseif tonumber(icon) then
+                 TabIcon.Image = "rbxassetid://" .. icon
+             end
+             TabIcon.Parent = TabButton
+        end
+        
+        local TabLabel = Instance.new("TextLabel")
+        TabLabel.Text = name
+        TabLabel.BackgroundTransparency = 1
+        TabLabel.TextColor3 = Colors.Secondary
+        TabLabel.Font = Enum.Font.GothamBold
+        TabLabel.TextSize = 14
+        TabLabel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        if icon then
+            TabLabel.Size = UDim2.new(1, -45, 1, 0)
+            TabLabel.Position = UDim2.new(0, 45, 0, 0)
+        else
+            TabLabel.Size = UDim2.new(1, -20, 1, 0)
+            TabLabel.Position = UDim2.new(0, 15, 0, 0)
+        end
+        TabLabel.Parent = TabButton
         
         local TabFrame = Instance.new("ScrollingFrame")
         TabFrame.Size = UDim2.new(1, -20, 1, -20)
@@ -574,22 +670,31 @@ function Library:Init(options)
 
         local TabObj = {
             Button = TabButton,
+            Label = TabLabel,
+            Icon = TabIcon,
             Frame = TabFrame
         }
 
         TabButton.MouseButton1Click:Connect(function()
             for _, t in pairs(Window.Tabs) do
                 t.Frame.Visible = false
-                TweenService:Create(t.Button, TweenInfo.new(0.2), {TextColor3 = Colors.Secondary}):Play()
+                TweenService:Create(t.Label, TweenInfo.new(0.2), {TextColor3 = Colors.Secondary}):Play()
+                if t.Icon then
+                    TweenService:Create(t.Icon, TweenInfo.new(0.2), {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+                end
             end
             TabFrame.Visible = true
-            TweenService:Create(TabButton, TweenInfo.new(0.2), {TextColor3 = accentColor}):Play()
+            TweenService:Create(TabLabel, TweenInfo.new(0.2), {TextColor3 = accentColor}):Play()
+            if TabIcon then
+                TweenService:Create(TabIcon, TweenInfo.new(0.2), {ImageColor3 = accentColor}):Play()
+            end
             Window.ActiveTab = TabObj
         end)
 
         if #Window.Tabs == 0 then
             TabFrame.Visible = true
-            TabButton.TextColor3 = accentColor
+            TabLabel.TextColor3 = accentColor
+            if TabIcon then TabIcon.ImageColor3 = accentColor end
             Window.ActiveTab = TabObj
         end
 
