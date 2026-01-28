@@ -191,12 +191,17 @@ function Library:Init(options)
     HeaderIcon.Image = "rbxassetid://102171960897605"
     HeaderIcon.Parent = Header
     
+    local IconAspect = Instance.new("UIAspectRatioConstraint")
+    IconAspect.AspectRatio = 1 -- Keep it square to avoid stretching
+    IconAspect.Parent = HeaderIcon
+    
     local Title = Instance.new("TextLabel")
     Title.Text = windowName
     Title.Font = Enum.Font.GothamBlack
     Title.TextSize = 18
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Size = UDim2.new(1, -120, 1, 0) -- Adjusted for icon
+    Title.AutomaticSize = Enum.AutomaticSize.X -- Auto adjust width
+    Title.Size = UDim2.new(0, 0, 1, 0) -- Let automatic size handle X
     Title.Position = UDim2.new(0, 45, 0, 0) -- Shifted right
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
@@ -222,9 +227,35 @@ function Library:Init(options)
         local VersionFrame = Instance.new("Frame")
         VersionFrame.AutomaticSize = Enum.AutomaticSize.X
         VersionFrame.Size = UDim2.new(0, 0, 0, 18)
-        VersionFrame.Position = UDim2.new(0, Title.TextBounds.X + 25, 0.5, -9)
+        -- Dynamic position based on Title's text bounds (wait for render or approximate)
+        -- We'll anchor it to the Title to move with it
+        VersionFrame.Position = UDim2.new(0, 0, 0.5, -9) 
         VersionFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        VersionFrame.Parent = Header
+        VersionFrame.Parent = Header -- Initially parent to Header
+        
+        -- Use a Layout to position Version next to Title automatically
+        -- Actually, simplest way is to put Title and Version in a container
+        local TitleContainer = Instance.new("Frame")
+        TitleContainer.Name = "TitleContainer"
+        TitleContainer.Size = UDim2.new(1, -120, 1, 0)
+        TitleContainer.Position = UDim2.new(0, 45, 0, 0)
+        TitleContainer.BackgroundTransparency = 1
+        TitleContainer.Parent = Header
+        
+        local TitleLayout = Instance.new("UIListLayout")
+        TitleLayout.FillDirection = Enum.FillDirection.Horizontal
+        TitleLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        TitleLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        TitleLayout.Padding = UDim.new(0, 10)
+        TitleLayout.Parent = TitleContainer
+        
+        -- Re-parent Title and Version to Container
+        Title.Parent = TitleContainer
+        Title.Position = UDim2.new(0,0,0,0) -- Reset position as layout handles it
+        Title.Size = UDim2.new(0, 0, 0, 25) -- Reset size, let auto size work
+        
+        VersionFrame.Parent = TitleContainer
+        VersionFrame.Position = UDim2.new(0,0,0,0) -- Reset position
         
         Instance.new("UICorner", VersionFrame).CornerRadius = UDim.new(0, 4)
         
