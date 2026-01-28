@@ -619,6 +619,74 @@ function Library:Init(options)
         end
     end)
 
+    -- Notification System
+    function Window:Notify(config)
+        config = config or {}
+        local title = config.Title or "Notification"
+        local content = config.Content or ""
+        local duration = config.Duration or 3
+        local image = config.Image or "rbxassetid://10747373176" -- Info icon default
+        
+        local NotifyFrame = Instance.new("Frame")
+        NotifyFrame.Name = "NotifyFrame"
+        NotifyFrame.Size = UDim2.new(0, 250, 0, 60)
+        NotifyFrame.Position = UDim2.new(1, 20, 1, -80) -- Start off-screen (right)
+        NotifyFrame.BackgroundColor3 = Colors.DarkContrast
+        NotifyFrame.BorderSizePixel = 0
+        NotifyFrame.Parent = ScreenGui
+        
+        Instance.new("UICorner", NotifyFrame).CornerRadius = UDim.new(0, 8)
+        
+        local Stroke = Instance.new("UIStroke")
+        Stroke.Color = Colors.Border
+        Stroke.Thickness = 1
+        Stroke.Parent = NotifyFrame
+        
+        local Icon = Instance.new("ImageLabel")
+        Icon.Size = UDim2.new(0, 24, 0, 24)
+        Icon.Position = UDim2.new(0, 10, 0.5, -12)
+        Icon.BackgroundTransparency = 1
+        Icon.Image = image
+        Icon.ImageColor3 = accentColor
+        Icon.Parent = NotifyFrame
+        
+        local TitleLabel = Instance.new("TextLabel")
+        TitleLabel.Text = title
+        TitleLabel.Size = UDim2.new(1, -50, 0, 20)
+        TitleLabel.Position = UDim2.new(0, 45, 0, 5)
+        TitleLabel.BackgroundTransparency = 1
+        TitleLabel.TextColor3 = Colors.Text
+        TitleLabel.Font = Enum.Font.GothamBold
+        TitleLabel.TextSize = 14
+        TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLabel.Parent = NotifyFrame
+        
+        local ContentLabel = Instance.new("TextLabel")
+        ContentLabel.Text = content
+        ContentLabel.Size = UDim2.new(1, -50, 0, 30)
+        ContentLabel.Position = UDim2.new(0, 45, 0, 25)
+        ContentLabel.BackgroundTransparency = 1
+        ContentLabel.TextColor3 = Colors.Secondary
+        ContentLabel.Font = Enum.Font.Gotham
+        ContentLabel.TextSize = 12
+        ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+        ContentLabel.TextWrapped = true
+        ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
+        ContentLabel.Parent = NotifyFrame
+        
+        -- Animation In
+        TweenService:Create(NotifyFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -270, 1, -80)}):Play()
+        
+        -- Slide out and destroy
+        task.delay(duration, function()
+            if NotifyFrame and NotifyFrame.Parent then
+                TweenService:Create(NotifyFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Position = UDim2.new(1, 20, 1, -80)}):Play()
+                task.wait(0.5)
+                NotifyFrame:Destroy()
+            end
+        end)
+    end
+    
     function Window:Toggle()
         MainFrame.Visible = not MainFrame.Visible
         if not isMobile then
