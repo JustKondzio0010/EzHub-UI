@@ -103,8 +103,12 @@ function Library:Init(options)
     options = options or {}
     local windowName = options.Name or "EzHub Library"
     local accentColor = options.Accent or Colors.Accent
+    local playerInfoAccent = options.PlayerInfoAccent or accentColor
     local versionText = options.Version or nil
+    local versionColor = options.VersionColor or accentColor
     Colors.Accent = accentColor
+    Colors.PlayerInfoAccent = playerInfoAccent
+    Colors.VersionAccent = versionColor
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = RandomString(math.random(15, 25))
@@ -178,13 +182,22 @@ function Library:Init(options)
     Header.Parent = MainFrame
     MakeDraggable(MainFrame, Header)
 
+    -- Header Icon
+    local HeaderIcon = Instance.new("ImageLabel")
+    HeaderIcon.Name = "HeaderIcon"
+    HeaderIcon.Size = UDim2.new(0, 24, 0, 24)
+    HeaderIcon.Position = UDim2.new(0, 15, 0.5, -12)
+    HeaderIcon.BackgroundTransparency = 1
+    HeaderIcon.Image = "rbxassetid://102171960897605"
+    HeaderIcon.Parent = Header
+    
     local Title = Instance.new("TextLabel")
     Title.Text = windowName
     Title.Font = Enum.Font.GothamBlack
     Title.TextSize = 18
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Size = UDim2.new(1, -80, 1, 0)
-    Title.Position = UDim2.new(0, 15, 0, 0)
+    Title.Size = UDim2.new(1, -120, 1, 0) -- Adjusted for icon
+    Title.Position = UDim2.new(0, 45, 0, 0) -- Shifted right
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
     Title.Parent = Header
@@ -217,8 +230,8 @@ function Library:Init(options)
         
         local VGradient = Instance.new("UIGradient")
         VGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, accentColor),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(math.clamp(accentColor.R * 255 + 50, 0, 255), math.clamp(accentColor.G * 255 + 50, 0, 255), math.clamp(accentColor.B * 255 + 50, 0, 255)))
+            ColorSequenceKeypoint.new(0, versionColor),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(math.clamp(versionColor.R * 255 + 50, 0, 255), math.clamp(versionColor.G * 255 + 50, 0, 255), math.clamp(versionColor.B * 255 + 50, 0, 255)))
         })
         VGradient.Rotation = 45
         VGradient.Parent = VersionFrame
@@ -380,7 +393,7 @@ function Library:Init(options)
     PName.Size = UDim2.new(1, 0, 0, 20)
     PName.Position = UDim2.new(0, 0, 0, 140)
     PName.BackgroundTransparency = 1
-    PName.TextColor3 = accentColor
+    PName.TextColor3 = playerInfoAccent
     PName.Font = Enum.Font.GothamBold
     PName.TextSize = 16
     PName.Parent = PlayerInfoFrame
@@ -475,7 +488,7 @@ function Library:Init(options)
         V.Size = UDim2.new(0.6, -10, 1, 0)
         V.Position = UDim2.new(0.4, 0, 0, 0)
         V.BackgroundTransparency = 1
-        V.TextColor3 = accentColor
+        V.TextColor3 = playerInfoAccent
         V.Font = Enum.Font.GothamBold
         V.TextSize = 11
         V.TextXAlignment = Enum.TextXAlignment.Right
