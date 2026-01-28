@@ -103,6 +103,7 @@ function Library:Init(options)
     options = options or {}
     local windowName = options.Name or "EzHub Library"
     local accentColor = options.Accent or Colors.Accent
+    local versionText = options.Version or nil
     Colors.Accent = accentColor
 
     local ScreenGui = Instance.new("ScreenGui")
@@ -204,6 +205,43 @@ function Library:Init(options)
         end
     end)
 
+    if versionText then
+        local VersionFrame = Instance.new("Frame")
+        VersionFrame.AutomaticSize = Enum.AutomaticSize.X
+        VersionFrame.Size = UDim2.new(0, 0, 0, 18)
+        VersionFrame.Position = UDim2.new(0, Title.TextBounds.X + 25, 0.5, -9)
+        VersionFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        VersionFrame.Parent = Header
+        
+        Instance.new("UICorner", VersionFrame).CornerRadius = UDim.new(0, 4)
+        
+        local VGradient = Instance.new("UIGradient")
+        VGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, accentColor),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(math.clamp(accentColor.R * 255 + 50, 0, 255), math.clamp(accentColor.G * 255 + 50, 0, 255), math.clamp(accentColor.B * 255 + 50, 0, 255)))
+        })
+        VGradient.Rotation = 45
+        VGradient.Parent = VersionFrame
+        
+        local VLabel = Instance.new("TextLabel")
+        VLabel.Text = versionText
+        VLabel.Font = Enum.Font.GothamBold
+        VLabel.TextSize = 11
+        VLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        VLabel.Size = UDim2.new(1, 0, 1, 0)
+        VLabel.BackgroundTransparency = 1
+        VLabel.Parent = VersionFrame
+        
+        -- Add padding
+        local VPad = Instance.new("UIPadding")
+        VPad.PaddingLeft = UDim.new(0, 6)
+        VPad.PaddingRight = UDim.new(0, 6)
+        VPad.Parent = VersionFrame
+        
+        -- Update position when title changes size (though title size is fixed UDim2, textbounds might change if we were dynamic, but here it's fine to just set once or observe)
+        -- For robustness, let's keep it static relative to text start or just fix it after title
+    end
+
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Text = "X"
     CloseBtn.Font = Enum.Font.GothamBold
@@ -216,26 +254,62 @@ function Library:Init(options)
     
     CloseBtn.MouseEnter:Connect(function() TweenService:Create(CloseBtn, TweenInfo.new(0.2), {TextColor3 = Colors.Error}):Play() end)
     CloseBtn.MouseLeave:Connect(function() TweenService:Create(CloseBtn, TweenInfo.new(0.2), {TextColor3 = Colors.Secondary}):Play() end)
+    -- Safe Tween
+    local function SafeTween(instance, info, props)
+        if not instance or not instance.Parent then return end
+        local success, tween = pcall(function()
+            return TweenService:Create(instance, info, props)
+        end)
+        if success and tween then
+            tween:Play()
+            return tween
+        end
+    end
+
     CloseBtn.MouseButton1Click:Connect(function()
         -- Close Animation
         local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-        TweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(0, width, 0, 0), BackgroundTransparency = 1}):Play()
-        TweenService:Create(PlayerInfoFrame, tweenInfo, {Size = UDim2.new(0, playerInfoWidth, 0, 0), BackgroundTransparency = 1}):Play()
-        TweenService:Create(FloatingIcon, tweenInfo, {ImageTransparency = 1}):Play()
         
-        for _, desc in pairs(MainFrame:GetDescendants()) do
-            if desc:IsA("GuiObject") then
-                TweenService:Create(desc, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1, ImageTransparency = 1}):Play()
+        -- Safely Tween Main Frames
+        SafeTween(MainFrame, tweenInfo, {Size = UDim2.new(0, width, 0, 0), BackgroundTransparency = 1})
+        SafeTween(PlayerInfoFrame, tweenInfo, {Size = UDim2.new(0, playerInfoWidth, 0, 0), BackgroundTransparency = 1})
+        SafeTween(FloatingIcon, tweenInfo, {ImageTransparency = 1})
+        
+        -- Helper to tween descendants
+        local function TweenDescendants(parent)
+            if not parent then return end
+            for _, desc in pairs(parent:GetDescendants()) do
+                if desc:IsA("GuiObject") then
+                     -- Check for valid properties before tweening
+                     local props = {}
+                     if desc:IsA("Frame") or desc:IsA("ScrollingFrame") then
+                         props.BackgroundTransparency = 1
+                     elseif desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
+                         props.BackgroundTransparency = 1
+                         props.TextTransparency = 1
+                     elseif desc:IsA("ImageLabel") or desc:IsA("ImageButton") then
+                         props.BackgroundTransparency = 1
+                         props.ImageTransparency = 1
+                     elseif desc:IsA("UIStroke") then
+                         props.Transparency = 1
+                     end
+                     
+                     if next(props) then
+                         SafeTween(desc, TweenInfo.new(0.3), props)
+                     end
+                end
             end
         end
-        for _, desc in pairs(PlayerInfoFrame:GetDescendants()) do
-            if desc:IsA("GuiObject") then
-                TweenService:Create(desc, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1, ImageTransparency = 1}):Play()
-            end
-        end
+
+        TweenDescendants(MainFrame)
+        TweenDescendants(PlayerInfoFrame)
         
-        task.wait(0.5)
-        ScreenGui:Destroy()
+        -- Wait and Destroy
+        task.delay(0.5, function()
+            if ScreenGui and ScreenGui.Parent then
+                ScreenGui:Destroy()
+            end
+        end)
     end)
 
     -- Minimize Button
@@ -338,6 +412,25 @@ function Library:Init(options)
     PIToggleBtn.Position = UDim2.new(1, -35, 0, 0)
     PIToggleBtn.BackgroundTransparency = 1
     PIToggleBtn.Parent = PIHeader
+
+    -- Close Player Info Button (New)
+    local PICloseBtn = Instance.new("TextButton")
+    PICloseBtn.Text = "X"
+    PICloseBtn.Font = Enum.Font.GothamBold
+    PICloseBtn.TextSize = 14
+    PICloseBtn.TextColor3 = Colors.Secondary
+    PICloseBtn.Size = UDim2.new(0, 30, 1, 0)
+    PICloseBtn.Position = UDim2.new(1, -65, 0, 0)
+    PICloseBtn.BackgroundTransparency = 1
+    PICloseBtn.Parent = PIHeader
+    
+    PICloseBtn.MouseButton1Click:Connect(function()
+        TweenService:Create(PlayerInfoFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+        task.wait(0.3)
+        PlayerInfoFrame.Visible = false
+    end)
+    PICloseBtn.MouseEnter:Connect(function() TweenService:Create(PICloseBtn, TweenInfo.new(0.2), {TextColor3 = Colors.Error}):Play() end)
+    PICloseBtn.MouseLeave:Connect(function() TweenService:Create(PICloseBtn, TweenInfo.new(0.2), {TextColor3 = Colors.Secondary}):Play() end)
 
     local piExpanded = true
     PIToggleBtn.MouseButton1Click:Connect(function()
